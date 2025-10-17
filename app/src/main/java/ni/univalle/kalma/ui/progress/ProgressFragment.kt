@@ -13,8 +13,7 @@ import ni.univalle.kalma.data.AppDatabase
 import ni.univalle.kalma.data.MoodRepository
 import ni.univalle.kalma.datastore.UserPrefsDataStore
 import ni.univalle.kalma.databinding.FragmentProgressBinding
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import ni.univalle.kalma.util.DateUtils
 
 class ProgressFragment : Fragment() {
 
@@ -34,16 +33,13 @@ class ProgressFragment : Fragment() {
         val prefs = UserPrefsDataStore(requireContext())
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val to = LocalDate.now()
-            val from = to.minusDays(6)
-            val data = repo.weekly(from, to).first()
+            val daysIso = DateUtils.recentDaysIso(7)
+            val data = repo.weekly(daysIso.first(), daysIso.last()).first()
 
-            val days = (0..6).map { from.plusDays(it.toLong()) }
-            val map = data.associateBy({ LocalDate.parse(it.dateIso) }, { it.mood.toFloat() })
-            val entries = days.map { d -> map[d] ?: Float.NaN }
+            val map = data.associateBy({ it.dateIso }, { it.mood.toFloat() })
+            val entries = daysIso.map { iso -> map[iso] ?: Float.NaN }
 
-            val fmt = DateTimeFormatter.ofPattern("E")
-            val labels = days.map { it.format(fmt) }
+            val labels = daysIso.map { DateUtils.weekdayLabel(it) }
 
             binding.chart.setData(entries, labels, 0f, 4f)
 

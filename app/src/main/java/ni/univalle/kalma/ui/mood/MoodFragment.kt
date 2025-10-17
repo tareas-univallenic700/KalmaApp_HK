@@ -14,7 +14,7 @@ import ni.univalle.kalma.data.AppDatabase
 import ni.univalle.kalma.data.MoodRepository
 import ni.univalle.kalma.datastore.UserPrefsDataStore
 import ni.univalle.kalma.databinding.FragmentMoodBinding
-import java.time.LocalDate
+import ni.univalle.kalma.util.DateUtils
 
 class MoodFragment : Fragment() {
 
@@ -40,15 +40,15 @@ class MoodFragment : Fragment() {
             val note = binding.etNote.text?.toString()
             viewLifecycleOwner.lifecycleScope.launch {
                 repo.addToday(selectedMood, note)
-                val today = LocalDate.now()
+                val todayIso = DateUtils.todayIso()
                 val last = prefs.lastMoodDateFlow.first()
                 val prevStreak = prefs.streakFlow.first()
                 val newStreak = when (last) {
-                    today.toString() -> prevStreak
-                    today.minusDays(1).toString() -> prevStreak + 1
+                    todayIso -> prevStreak
+                    DateUtils.yesterdayIso() -> prevStreak + 1
                     else -> 1
                 }
-                prefs.setLastMood(today.toString(), newStreak)
+                prefs.setLastMood(todayIso, newStreak)
             }
         }
     }

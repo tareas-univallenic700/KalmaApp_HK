@@ -3,7 +3,7 @@ package ni.univalle.kalma.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.LocalDate
+import ni.univalle.kalma.util.DateUtils
 
 @Entity(tableName = "mood_entries")
 data class MoodEntry(
@@ -15,7 +15,7 @@ data class MoodEntry(
     companion object {
         fun today(mood: Int, note: String?) = MoodEntry(
             id = 0,
-            dateIso = LocalDate.now().toString(),
+            dateIso = DateUtils.todayIso(),
             mood = mood,
             note = note
         )
