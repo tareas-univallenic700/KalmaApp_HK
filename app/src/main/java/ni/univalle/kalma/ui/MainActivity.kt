@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     ) { isGranted ->
         if (isGranted) {
             scheduleDailyWorker()
+        } else {
+            cancelDailyWorker()
         }
     }
 
@@ -44,12 +46,21 @@ class MainActivity : AppCompatActivity() {
     private fun ensureNotificationPermissionThenSchedule() {
         if (Build.VERSION.SDK_INT >= 33) {
             val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-            if (!granted) requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS) else scheduleDailyWorker()
+            if (!granted) {
+                cancelDailyWorker()
+                requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                scheduleDailyWorker()
+            }
         } else scheduleDailyWorker()
     }
 
     private fun scheduleDailyWorker() {
         Scheduler.scheduleDailyReminder(WorkManager.getInstance(this), 20, 0)
+    }
+
+    private fun cancelDailyWorker() {
+        Scheduler.cancelDailyReminder(WorkManager.getInstance(this))
     }
 
     override fun onDestroy() {
