@@ -1,0 +1,21 @@
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/moodFragment">
+
+    <fragment
+        android:id="@+id/moodFragment"
+        android:name="ni.univalle.kalma.ui.mood.MoodFragment"
+        android:label="@string/nav_mood" />
+
+    <fragment
+        android:id="@+id/breathingFragment"
+        android:name="ni.univalle.kalma.ui.breath.BreathingFragment"
+        android:label="@string/nav_breathe" />
+
+    <fragment
+        android:id="@+id/progressFragment"
+        android:name="ni.univalle.kalma.ui.progress.ProgressFragment"
+        android:label="@string/nav_progress" />
+</navigation>

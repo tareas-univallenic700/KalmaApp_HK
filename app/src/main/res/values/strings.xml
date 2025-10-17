@@ -1,0 +1,8 @@
+
+<resources>
+    <string name="app_name">Kalma</string>
+    <string name="nav_mood">Ánimo</string>
+    <string name="nav_breathe">Respirar</string>
+    <string name="nav_progress">Progreso</string>
+    <string name="streak_days">Racha: %1$d días</string>
+</resources>

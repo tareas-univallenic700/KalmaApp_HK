@@ -1,0 +1,6 @@
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/moodFragment" android:title="@string/nav_mood" android:icon="@drawable/kalma_mascota"/>
+    <item android:id="@+id/breathingFragment" android:title="@string/nav_breathe" android:icon="@drawable/kalma_mascota"/>
+    <item android:id="@+id/progressFragment" android:title="@string/nav_progress" android:icon="@drawable/kalma_mascota"/>
+</menu>
