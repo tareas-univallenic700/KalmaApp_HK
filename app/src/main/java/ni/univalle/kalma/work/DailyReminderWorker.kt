@@ -1,9 +1,13 @@
 
 package ni.univalle.kalma.work
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import ni.univalle.kalma.KalmaApp
@@ -24,7 +28,17 @@ class DailyReminderWorker(appContext: Context, params: WorkerParameters) : Corou
             .setContentText(message)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(applicationContext).notify(Random.nextInt(), notification)
+        val notificationManager = NotificationManagerCompat.from(applicationContext)
+        val hasRuntimePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        val canNotify = notificationManager.areNotificationsEnabled() && hasRuntimePermission
+
+        if (canNotify) {
+            notificationManager.notify(Random.nextInt(), notification)
+        }
         return Result.success()
     }
 }

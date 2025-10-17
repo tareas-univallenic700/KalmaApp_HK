@@ -21,7 +21,11 @@ class MainActivity : AppCompatActivity() {
 
     private val requestPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ -> scheduleDailyWorker() }
+    ) { isGranted ->
+        if (isGranted) {
+            scheduleDailyWorker()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
