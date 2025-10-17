@@ -36,9 +36,15 @@ class DailyReminderWorker(appContext: Context, params: WorkerParameters) : Corou
             ) == PackageManager.PERMISSION_GRANTED
         val canNotify = notificationManager.areNotificationsEnabled() && hasRuntimePermission
 
-        if (canNotify) {
-            notificationManager.notify(Random.nextInt(), notification)
+        if (!canNotify) {
+            return Result.success()
         }
-        return Result.success()
+
+        return try {
+            notificationManager.notify(Random.nextInt(), notification)
+            Result.success()
+        } catch (securityException: SecurityException) {
+            Result.success()
+        }
     }
 }
