@@ -1,17 +1,15 @@
 
 package ni.univalle.kalma.work
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import ni.univalle.kalma.KalmaApp
 import ni.univalle.kalma.R
+import ni.univalle.kalma.notifications.NotificationPermissions
 import kotlin.random.Random
 
 class DailyReminderWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
@@ -21,6 +19,13 @@ class DailyReminderWorker(appContext: Context, params: WorkerParameters) : Corou
         "Tu bienestar cuenta. ¿Anotamos tu estado de ánimo?"
     )
     override suspend fun doWork(): Result {
+        val workManager = WorkManager.getInstance(applicationContext)
+
+        if (!NotificationPermissions.canPostNotifications(applicationContext)) {
+            Scheduler.cancelDailyReminder(workManager)
+            return Result.success()
+        }
+
         val message = messages[Random.nextInt(messages.size)]
         val notification = NotificationCompat.Builder(applicationContext, KalmaApp.CHANNEL_WELLBEING)
             .setSmallIcon(R.drawable.kalma_mascota)
@@ -29,21 +34,11 @@ class DailyReminderWorker(appContext: Context, params: WorkerParameters) : Corou
             .setAutoCancel(true)
             .build()
         val notificationManager = NotificationManagerCompat.from(applicationContext)
-        val hasRuntimePermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        val canNotify = notificationManager.areNotificationsEnabled() && hasRuntimePermission
-
-        if (!canNotify) {
-            return Result.success()
-        }
-
-        return try {
+        return runCatching {
             notificationManager.notify(Random.nextInt(), notification)
             Result.success()
-        } catch (securityException: SecurityException) {
+        }.getOrElse {
+            Scheduler.cancelDailyReminder(workManager)
             Result.success()
         }
     }

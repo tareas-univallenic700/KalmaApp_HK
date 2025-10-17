@@ -1,18 +1,15 @@
 
 package ni.univalle.kalma.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import androidx.work.WorkManager
 import ni.univalle.kalma.R
 import ni.univalle.kalma.databinding.ActivityMainBinding
+import ni.univalle.kalma.notifications.NotificationPermissions
 import ni.univalle.kalma.work.Scheduler
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private val requestPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
+        if (isGranted && NotificationPermissions.canPostNotifications(this)) {
             scheduleDailyWorker()
         } else {
             cancelDailyWorker()
@@ -44,15 +41,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun ensureNotificationPermissionThenSchedule() {
-        if (Build.VERSION.SDK_INT >= 33) {
-            val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-            if (!granted) {
-                cancelDailyWorker()
-                requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                scheduleDailyWorker()
-            }
-        } else scheduleDailyWorker()
+        if (NotificationPermissions.canPostNotifications(this)) {
+            scheduleDailyWorker()
+            return
+        }
+
+        cancelDailyWorker()
+
+        if (NotificationPermissions.requiresRuntimePermission() &&
+            !NotificationPermissions.hasRuntimePermission(this)
+        ) {
+            requestPermission.launch(NotificationPermissions.POST_NOTIFICATIONS_PERMISSION)
+        }
     }
 
     private fun scheduleDailyWorker() {
